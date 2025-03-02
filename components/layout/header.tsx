@@ -1,54 +1,64 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Menu, X, ShoppingCart, User, Search, Package, Heart, LogOut, LogIn } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import type React from "react"
+
+import { useState, useEffect } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
+import { Menu, X, ShoppingCart, User, Search, Package, Heart, LogOut, LogIn } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useCarrinho } from "../../hooks/use-carrinho";
-import { useAuth } from "../../contexts/auth-context";
-import { usePontos } from "../../contexts/pontos-context";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/dropdown-menu"
+import { useCarrinho } from "../../hooks/use-carrinho"
+import { useAuth } from "../../contexts/auth-context"
+import { usePontos } from "../../contexts/pontos-context"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const pathname = usePathname();
-  const { qtdItens } = useCarrinho();
-  const { user, logout } = useAuth();
-  const { pontos } = usePontos();
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const pathname = usePathname()
+  const router = useRouter()
+  const { qtdItens } = useCarrinho()
+  const { user, logout } = useAuth()
+  const { pontos } = usePontos()
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
+      setIsScrolled(window.scrollY > 10)
+    }
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
-  const closeMenu = () => setIsMenuOpen(false);
+  const closeMenu = () => setIsMenuOpen(false)
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchTerm.trim()) {
+      router.push(`/produtos?search=${encodeURIComponent(searchTerm.trim())}`)
+    }
+  }
 
   return (
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${
-        isScrolled
-          ? "bg-blue-950/80 backdrop-blur-md border-b border-blue-500/20 shadow-lg"
-          : "bg-transparent"
+        isScrolled ? "bg-blue-950/80 backdrop-blur-md border-b border-blue-500/20 shadow-lg" : "bg-transparent"
       }`}
     >
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          {/* Seção Esquerda: Menu Mobile e Logo */}
+          {/* Left Section: Mobile Menu and Logo */}
           <div className="flex items-center">
             <Button
               variant="ghost"
@@ -64,7 +74,7 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Seção Central: Links de Navegação */}
+          {/* Center Section: Navigation Links */}
           <nav className="flex-1 hidden md:flex justify-center space-x-6">
             <Link
               href="/"
@@ -90,34 +100,20 @@ export default function Header() {
             >
               Promoções
             </Link>
-            <Link
-              href="/assinaturas"
-              className={`text-sm font-medium transition-colors hover:text-blue-400 ${
-                pathname === "/assinaturas" ? "text-blue-400" : "text-gray-300"
-              }`}
-            >
-              Assinaturas
-            </Link>
-            <Link
-              href="/comunidade"
-              className={`text-sm font-medium transition-colors hover:text-blue-400 ${
-                pathname === "/comunidade" ? "text-blue-400" : "text-gray-300"
-              }`}
-            >
-              Comunidade
-            </Link>
           </nav>
 
-          {/* Seção Direita: Busca e Ações do Usuário */}
+          {/* Right Section: Search and User Actions */}
           <div className="flex items-center space-x-4">
-            <div className="relative hidden md:block">
+            <form onSubmit={handleSearch} className="relative hidden md:block">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
               <Input
                 type="search"
                 placeholder="Buscar produtos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-[200px] lg:w-[300px] pl-9 bg-blue-950/40 border-blue-500/20 text-white placeholder:text-gray-400 focus-visible:ring-blue-400"
               />
-            </div>
+            </form>
             {user ? (
               <>
                 <DropdownMenu>
@@ -126,17 +122,12 @@ export default function Header() {
                       <Heart className="h-5 w-5 text-gray-300 hover:text-blue-400" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="bg-blue-950 border-blue-500/20 text-white"
-                  >
+                  <DropdownMenuContent align="end" className="bg-blue-950 border-blue-500/20 text-white">
                     <div className="p-2 text-center">
                       <p className="text-sm font-medium">Meus Favoritos</p>
                     </div>
                     <DropdownMenuSeparator className="bg-blue-800/30" />
-                    <div className="p-4 text-center text-sm">
-                      Sua lista de favoritos está vazia
-                    </div>
+                    <div className="p-4 text-center text-sm">Sua lista de favoritos está vazia</div>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <DropdownMenu>
@@ -147,10 +138,7 @@ export default function Header() {
                       <span className="hidden lg:inline"> pontos</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="bg-blue-950 border-blue-500/20 text-white"
-                  >
+                  <DropdownMenuContent align="end" className="bg-blue-950 border-blue-500/20 text-white">
                     <div className="p-4 text-center">
                       <p className="text-sm font-medium">Programa de Pontos</p>
                       <p className="text-2xl font-bold mt-1">{pontos} pontos</p>
@@ -164,11 +152,7 @@ export default function Header() {
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <Link href="/carrinho">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative text-gray-300 hover:text-blue-400"
-                  >
+                  <Button variant="ghost" size="icon" className="relative text-gray-300 hover:text-blue-400">
                     <ShoppingCart className="h-5 w-5" />
                     {qtdItens > 0 && (
                       <Badge className="absolute -top-2 -right-2 bg-blue-600 hover:bg-blue-600 h-5 w-5 flex items-center justify-center p-0 text-xs">
@@ -180,21 +164,14 @@ export default function Header() {
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="relative h-8 w-8 rounded-full"
-                      size="icon"
-                    >
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full" size="icon">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src="/placeholder-user.jpg" alt={user.nome} />
                         <AvatarFallback>{user.nome.charAt(0)}</AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="bg-blue-950 border-blue-500/20 text-white"
-                  >
+                  <DropdownMenuContent align="end" className="bg-blue-950 border-blue-500/20 text-white">
                     <div className="p-2">
                       <p className="text-sm font-medium">{user.nome}</p>
                       <p className="text-xs text-gray-400">{user.email}</p>
@@ -240,18 +217,20 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Menu Mobile */}
+      {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="fixed inset-0 top-16 bg-blue-950/95 backdrop-blur-sm overflow-y-auto z-40 md:hidden">
           <div className="container mx-auto p-4">
-            <div className="relative mb-4">
+            <form onSubmit={handleSearch} className="relative mb-4">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
               <Input
                 type="search"
                 placeholder="Buscar produtos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-9 bg-blue-950/40 border-blue-500/20 text-white placeholder:text-gray-400"
               />
-            </div>
+            </form>
             <nav className="grid gap-2">
               <Link
                 href="/"
@@ -279,24 +258,6 @@ export default function Header() {
                 onClick={closeMenu}
               >
                 Promoções
-              </Link>
-              <Link
-                href="/assinaturas"
-                className={`flex items-center p-2 rounded-lg ${
-                  pathname === "/assinaturas" ? "bg-blue-900/40 text-blue-400" : "text-gray-300"
-                }`}
-                onClick={closeMenu}
-              >
-                Assinaturas
-              </Link>
-              <Link
-                href="/comunidade"
-                className={`flex items-center p-2 rounded-lg ${
-                  pathname === "/comunidade" ? "bg-blue-900/40 text-blue-400" : "text-gray-300"
-                }`}
-                onClick={closeMenu}
-              >
-                Comunidade
               </Link>
             </nav>
             <div className="mt-6 border-t border-blue-800/30 pt-4">
@@ -351,8 +312,8 @@ export default function Header() {
                     <button
                       className="flex items-center p-2 rounded-lg text-red-400 w-full text-left"
                       onClick={() => {
-                        logout();
-                        closeMenu();
+                        logout()
+                        closeMenu()
                       }}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
@@ -369,10 +330,7 @@ export default function Header() {
                     </Button>
                   </Link>
                   <Link href="/conta/cadastro" onClick={closeMenu}>
-                    <Button
-                      variant="outline"
-                      className="w-full border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
-                    >
+                    <Button variant="outline" className="w-full border-blue-500/30 text-blue-400 hover:bg-blue-500/10">
                       Cadastrar
                     </Button>
                   </Link>
@@ -383,5 +341,6 @@ export default function Header() {
         </div>
       )}
     </header>
-  );
+  )
 }
+
